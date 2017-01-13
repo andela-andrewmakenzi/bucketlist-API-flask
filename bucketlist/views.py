@@ -1,6 +1,7 @@
-from flask import render_template, request
 from . import app
-from model import db
+from .model import db
+
+db.create_all()
 
 
 @app.route("/")
