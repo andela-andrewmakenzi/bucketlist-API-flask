@@ -1,5 +1,11 @@
 from flask import render_template, request
 from . import app
+from model import db
+
+
+@app.route("/")
+def main():
+    return "Wassuh ! :) This is an API yoh "
 
 
 @app.route("/auth/login", methods=["POST"])
