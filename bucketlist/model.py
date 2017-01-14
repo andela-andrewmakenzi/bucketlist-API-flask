@@ -19,8 +19,7 @@ class Bucketlist(db.Model):
     created_by = db.Column(db.String(20), nullable=False)
     items = db.relationship("Items", backref="bucket", lazy="dynamic")
 
-    def __init__(self, id, name, date_created, date_modified, created_by):
-        self.bucketlistid = id
+    def __init__(self, name, date_created, date_modified, created_by):
         self.name = name
         self.date_created = date_created
         self.date_modified = date_modified
@@ -41,8 +40,7 @@ class Items(db.Model):
     done = db.Column(db.Boolean, nullable=False, unique=False, default=False)
     bucketlistid = db.Column(db.Integer, db.ForeignKey("Bucketlist.id"), nullable=False, unique=False)
 
-    def __init__(self, id, name, data_created, date_modified, done):
-        self.userid = id
+    def __init__(self, name, data_created, date_modified, done):
         self.name = name
         self.date_created = date_created
         self.date_modified = date_modified
