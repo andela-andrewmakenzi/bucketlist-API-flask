@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from . import app
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
+from passlib.hash import sha256_crypt
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///./bucketlist.db"
 
@@ -56,7 +58,7 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
-    password = db.Column(db.String(120), nullable=False)
+    password = db.Column(db.String(64), nullable=False)
 
     def __init__(self, username, password):
         self.username = username
@@ -64,3 +66,31 @@ class User(db.Model):
 
     def __repr__():
         return "<{} {} {}>".format(self.id, self.username, self.password)
+
+    def validate_password():
+        # validate if password supplied is correct
+        pass
+
+    def hash_password():
+        self.password = sha256_crypt.encrypt(self.password)
+
+    def generate_auth_token():
+        # generate authentication token based on the unique userid field
+        s = Serializer(app.config['SECRET_KEY'], expires_in=600)
+        return s.dumps(self.id)
+
+    @staticmethod
+    # this is static as it is called before the user object is created
+    def verify_auth_token(token):
+        s = Serializer(app.config['SECRET_KEY'], expires_in=600)
+        try:
+            # this should return the user id
+            userid = s.loads(token)
+        except SignatureExpired:
+            return None
+        except BadSignature:
+            return None
+        return userid
+
+
+db.create_all()
