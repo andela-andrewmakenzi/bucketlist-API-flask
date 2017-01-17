@@ -1,18 +1,18 @@
 import unittest
-from bucketlist import app
-import tempfile
-import os
+from ..bucketlist import app
+from ..bucketlist.model import db
 
 
 class TestBucketList(unittest.TestCase):
-    def SetUp(self):
-        self.db_handle, app.config["SQLALCHEMY_DATABASE_URI"] = tempfile.mkstemp()
+    def setUp(self):
+        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///./testbucketlist.db"
         app.config["TESTING"] = True
         self.app = app.test_client()
+        db.create_all()
 
     def tearDown(self):
-        os.close(self.db_handle)
-        os.unlink(app.config["SQLALCHEMY_DATABASE_URI"])
+        db.session.remove()  # will call session remove
+        db.drop_all()
 
 
 if __name__ == "__main__":
