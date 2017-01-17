@@ -91,6 +91,3 @@ class User(db.Model):
         except BadSignature:
             return None
         return userid
-
-
-db.create_all()
