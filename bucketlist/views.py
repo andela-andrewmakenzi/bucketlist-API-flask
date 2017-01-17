@@ -5,6 +5,7 @@ from .model import User
 from flask_httpauth import HTTPTokenAuth
 
 auth = HTTPTokenAuth()
+db.create_all()
 
 
 @auth.login_required
@@ -50,7 +51,7 @@ def register():
     user.hash_password()
     db.session.add(user)
     # get the current state of this object in session from db
-    db.session.flush()
+    db.session.flush() 
     db.session.commit()
     token = User.generate_auth_token()
     return jsonify(token), 200
@@ -97,3 +98,13 @@ def update_bucket_list_item():
 def delete_bucket_list_item():
     pass
 
+
+@app.errorhandler(500)
+def handle500():
+    db.session.rollback()
+    return jsonify({"messgae": "We are experiencing technical issues right now, please be patient"}), 500
+
+
+@app.errorhandler(404)
+def handle404():
+    return jsonify({"message": "Arent you lost"})
