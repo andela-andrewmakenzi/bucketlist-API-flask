@@ -32,11 +32,11 @@ def login():
     if not username or not password:
         """ we expect the username and password passed as json """
         return jsonify({"message": "Requires username and password to be provided"}), 400
-    user = db.query("User").filter_by(username=username).first()
-    if not user or not user.validate_password():  # case of invalid credentials
+    user = db.session.query(User).filter_by(username=username).first()
+    if not user:# or not user.validate_password():  # case of invalid credentials
         return jsonify({"message": "Invalid login credentials"}), 401
-    token = User.generate_auth_token()
-    return jsonify(token), 200
+    token = user.generate_auth_token()
+    return jsonify(str(token)), 200
 
 
 @app.route("/auth/register", methods=["POST"])
@@ -51,7 +51,7 @@ def register():
     user.hash_password()
     db.session.add(user)
     # get the current state of this object in session from db
-    db.session.flush() 
+    db.session.flush()
     db.session.commit()
     token = User.generate_auth_token()
     return jsonify(token), 200
@@ -100,11 +100,11 @@ def delete_bucket_list_item():
 
 
 @app.errorhandler(500)
-def handle500():
+def handle500(e):
     db.session.rollback()
     return jsonify({"messgae": "We are experiencing technical issues right now, please be patient"}), 500
 
 
 @app.errorhandler(404)
-def handle404():
-    return jsonify({"message": "Arent you lost"})
+def handle404(e):
+    return jsonify({"message": "Arent you lost"}), 404
