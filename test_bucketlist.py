@@ -32,30 +32,37 @@ class TestBucketList(unittest.TestCase):
     def test_login_no_username(self):
         credentials = {"username": "", "password": "admin"}
         response = self.client.post("/auth/login", data=json.dumps(credentials), content_type="application/json")
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
 
     def test_login_no_password(self):
         credentials = {"username": "admin", "password": ""}
         response = self.client.post("/auth/login", data=json.dumps(credentials), content_type="application/json")
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
 
     def test_login_no_credentials(self):
         credentials = {"username": "", "password": ""}
         response = self.client.post("/auth/login", data=json.dumps(credentials), content_type="application/json")
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
 
+    def test_register_user(self):
+        credentials = {"username": "andrew", "password": "andrew"}  # this should be the second user we are registering
+        response = self.client.post("/auth/register", data=json.dumps(credentials), content_type="application/json")
+        self.assertEqual(response.status_code, 200)
 
-    # def test_register_user(self):
-    #     pass
+    def test_register_user_no_username(self):
+        credentials = {"username": "", "password": "andrew"}  # this should be the second user we are registering
+        response = self.client.post("/auth/register", data=json.dumps(credentials), content_type="application/json")
+        self.assertEqual(response.status_code, 401)
 
-    # def test_register_user_pass_no_username(self):
-    #     pass
+    def test_register_user_pass_no_password(self):
+        credentials = {"username": "andrew", "password": ""}  # this should be the second user we are registering
+        response = self.client.post("/auth/register", data=json.dumps(credentials), content_type="application/json")
+        self.assertEqual(response.status_code, 401)
 
-    # def test_register_user_pass_no_password(self):
-    #     pass
-
-    # def test_register_user_pass_no_username_or_password(self):
-    #     pass
+    def test_register_user_pass_no_username_or_password(self):
+        credentials = {"username": "", "password": ""}  # this should be the second user we are registering
+        response = self.client.post("/auth/register", data=json.dumps(credentials), content_type="application/json")
+        self.assertEqual(response.status_code, 401)
 
     # def test_register_with_existing_username(self):
     #     pass
