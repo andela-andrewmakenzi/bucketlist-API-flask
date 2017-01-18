@@ -69,17 +69,32 @@ class TestBucketList(unittest.TestCase):
         response = self.client.post("/auth/register", data=json.dumps(credentials), content_type="application/json")
         self.assertEqual(response.status_code, 401)
 
-    # def test_create_bucketlist(self):
-    #     pass
+    def test_create_bucketlist(self):
+        # we have one user, username admin, in the database
+        user = db.session.query(User).filter_by(username="admin").first()
+        token = user.generate_auth_token()  # simulate login
+        print(token)
+        credentials = str(token)
+        bucketname = "games to buy"
+        response = self.client.post("/bucketlists", data=json.dumps({"token": credentials, "name": bucketname}), content_type="application/json")
+        self.assertEqual(response.status_code, 200)  # we know it has not errored if 200 is returned from this function
 
     # def test_create_bucketlist_no_bucketlistname(self):
     #     # when they try create a bucketlist but dont supply a name for it
-    #     pass
+    #     user = db.session.query(User).filter_by(username="admin").first()
+    #     token = user.generate_auth_token()
+    #     credentials = token
+    #     response = self.client.post("/auth/register", data=credentials, content_type="application/json")
+    #     self.assertEqual(response, 200)  # we know it has not errored if 200 is returned from this function
 
     # def test_create_bucketlist_unauthorized(self):
     #     """ test what will happen if they try to create a password but they are
     #     not logged in """
-    #     pass
+    #     user = db.session.query(User).filter_by(username="admin").first()
+    #     token = user.generate_auth_token()  # simulate login
+    #     credentials = token
+    #     response = self.client.post("/auth/register", data=credentials, content_type="application/json")
+    #     self.assertEqual(response, 200)  # we know it has not errored if 200 is returned from this function
 
     # def test_get_bucketlists(self):
     #     pass
