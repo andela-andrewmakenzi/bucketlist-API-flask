@@ -1,6 +1,6 @@
 import unittest
 from bucketlist import app
-from bucketlist.model import db, User
+from bucketlist.model import db, User, Bucketlist
 from flask import json
 
 
@@ -70,31 +70,23 @@ class TestBucketList(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_create_bucketlist(self):
-        # we have one user, username admin, in the database
         user = db.session.query(User).filter_by(username="admin").first()
         token = user.generate_auth_token()  # simulate login
-        print(token)
         credentials = str(token)
         bucketname = "games to buy"
         response = self.client.post("/bucketlists", data=json.dumps({"token": credentials, "name": bucketname}), content_type="application/json")
-        self.assertEqual(response.status_code, 200)  # we know it has not errored if 200 is returned from this function
+        self.assertEqual(response.status_code, 200)
+        # also check if there is bucketlist in the db with that name
+        name = db.session.query(Bucketlist).filter_by(name=bucketname).first()
+        self.assertTrue(name is not None)
 
-    # def test_create_bucketlist_no_bucketlistname(self):
-    #     # when they try create a bucketlist but dont supply a name for it
-    #     user = db.session.query(User).filter_by(username="admin").first()
-    #     token = user.generate_auth_token()
-    #     credentials = token
-    #     response = self.client.post("/auth/register", data=credentials, content_type="application/json")
-    #     self.assertEqual(response, 200)  # we know it has not errored if 200 is returned from this function
-
-    # def test_create_bucketlist_unauthorized(self):
-    #     """ test what will happen if they try to create a password but they are
-    #     not logged in """
-    #     user = db.session.query(User).filter_by(username="admin").first()
-    #     token = user.generate_auth_token()  # simulate login
-    #     credentials = token
-    #     response = self.client.post("/auth/register", data=credentials, content_type="application/json")
-    #     self.assertEqual(response, 200)  # we know it has not errored if 200 is returned from this function
+    def test_create_bucketlist_no_bucketlistname(self):
+        user = db.session.query(User).filter_by(username="admin").first()
+        token = user.generate_auth_token()  # simulate login
+        credentials = str(token)
+        bucketname = ""  # blank and invalid name 
+        response = self.client.post("/bucketlists", data=json.dumps({"token": credentials, "name": bucketname}), content_type="application/json")
+        self.assertEqual(response.status_code, 401)  # must supply a name for the bucketlist
 
     # def test_get_bucketlists(self):
     #     pass
