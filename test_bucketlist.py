@@ -1,12 +1,13 @@
 import unittest
 from bucketlist import app
 from bucketlist.model import db, User
-
+from flask import json
 
 class TestBucketList(unittest.TestCase):
     def setUp(self):
         app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///../testbucketlist.db"
         app.config["TESTING"] = True
+        db.drop_all()
         db.create_all()
         self.client = app.test_client()
 
@@ -21,14 +22,11 @@ class TestBucketList(unittest.TestCase):
     def test_login(self):
         # attempt to create new valid user and login
         new_user = User("admin", "admin")
-        new_user.hash_password() # encrpyt password before storing in database
+        new_user.hash_password()  # encrpyt password before storing in database
         db.session.add(new_user)
-        db.session.commit() # user is now in our database
-
-        print(User.query.all())
-
-        self.user_credentials = {"username": "admin", "password": "admin"}
-        response = self.client.post("/auth/login", data=dict(self.user_credentials), content_type = "application/json", follow_redirects = True)
+        db.session.commit()  # user is now in our database
+        credentials = {"username": "admin", "password": "admin"}
+        response = self.client.post("/auth/login", data=json.dumps(credentials), content_type="application/json")
         self.assertEqual(response.status_code, 200)
 
     # def test_login_no_username(self):
