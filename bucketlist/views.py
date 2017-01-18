@@ -4,14 +4,15 @@ from flask import request, jsonify, g
 from .model import User
 from flask_httpauth import HTTPTokenAuth
 
-auth = HTTPTokenAuth()
+auth = HTTPTokenAuth(scheme='Token')
 db.create_all()
 
 
-@auth.login_required
-def verify_token(token, password):
+@auth.verify_token
+def verify_token(Token):
     # they supply a token in place of the username in HTTPBasicAuthentication
-    userid = User.verify_auth_token(token)
+    token = request.json.get('token')
+    userid = User.verify_auth_token(token=token)
     if userid is None:
         return jsonify({"message": "Invalid or expired token"}), 401
     g.user_id = userid
@@ -25,47 +26,57 @@ def main():
 
 @app.route("/auth/login", methods=["POST"])
 def login():
-    if not request.json:
-        return jsonify({"message": "Expected username and password sent via JSON"}), 400
-    username = request.json.get("username")
-    password = request.json.get("password")
-    if not username or not password:
-        """ we expect the username and password passed as json """
-        return jsonify({"message": "Requires username and password to be provided"}), 400
-    user = db.session.query(User).filter_by(username=username).first()
-    if not user:# or not user.validate_password():  # case of invalid credentials
-        return jsonify({"message": "Invalid login credentials"}), 401
-    token = user.generate_auth_token()
-    return jsonify(str(token)), 200
+    # if not request.json:
+    #     return jsonify({"message": "Expected username and password sent via JSON"}), 400
+    # username = request.json.get("username")
+    # password = request.json.get("password")
+    # if not username or not password:
+    #     """ we expect the username and password passed as json """
+    #     return jsonify({"message": "Requires username and password to be provided"}), 401
+    # new_user = db.session.query(User).filter_by(username=username).first()
+    # if not new_user or not new_user.validate_password(password):  # case of invalid credentials
+    #     return jsonify({"message": "Invalid login credentials"}), 401
+    # token = new_user.generate_auth_token()
+    # return jsonify(str(token)), 200
+    pass
 
 
 @app.route("/auth/register", methods=["POST"])
 def register():
-    if not request.json:
-        return jsonify({"message": "Expected username and password sent via JSON"}), 400
-    username = request.json.get("username")
-    password = request.json.get("password")
-    if not username or not password:
-        return jsonify({"message": "Requires username and password to be provided"}), 400
-    user = User(username, password)
-    user.hash_password()
-    db.session.add(user)
-    # get the current state of this object in session from db
-    db.session.flush()
-    db.session.commit()
-    token = User.generate_auth_token()
-    return jsonify(token), 200
+    # if not request.json:
+    #     return jsonify({"message": "Expected username and password sent via JSON"}), 400
+    # username = request.json.get("username")
+    # password = request.json.get("password")
+    # if not username or not password:
+    #     return jsonify({"message": "Requires username and password to be provided"}), 401
+    # user = db.session.query(User).filter_by(username=username).first()
+    # if user:
+    #     return jsonify({"message": "Cannot created user, already exists"}), 401
+    # new_user = User(username, password)
+    # db.session.add(new_user)
+    # # get the current state of this object in session from db
+    # db.session.flush()
+    # db.session.commit()
+    # token = new_user.generate_auth_token()
+    # return jsonify(str(token)), 200
+    pass
+
+
+@app.route("/bucketlists", methods=["POST"])
+@auth.login_required
+def create_bucketlist():
+    pass
 
 
 @app.route("/bucketlists", methods=["GET"])
 @auth.login_required
-def show_bucketlist():
+def list_created_bucketlist():
     pass
 
 
 @app.route("/bucketlists/<id>", methods=["GET"])
 @auth.login_required
-def show_bucketlists():
+def get_bucket():
     pass
 
 
@@ -77,7 +88,7 @@ def update_bucketlist():
 
 @app.route("/bucketlists/<id>", methods=["DELETE"])
 @auth.login_required
-def create_bucketlist():
+def delete_bucketlist():
     pass
 
 
