@@ -27,7 +27,7 @@ class Bucketlist(db.Model):
         self.date_modified = date_modified
         self.created_by = created_by
 
-    def __repr__():
+    def __repr__(self):
         return "<{} {} {} {} {} >".format(self.id, self.name, self.date_created, self.date_modified, self.created_by)
 
 
@@ -48,7 +48,7 @@ class Items(db.Model):
         self.date_modified = date_modified
         self.done = done
 
-    def __repr__():
+    def __repr__(self):
         return "<{} {} {} {} {} >".format(self,userid, self.name, self.date_created, self.date_modified, self.done)
 
 
@@ -62,26 +62,26 @@ class User(db.Model):
 
     def __init__(self, username, password):
         self.username = username
-        self.password = password
+        self.password = self.hash_password(password)
 
-    def __repr__():
+    def __repr__(self):
         return "<{} {} {}>".format(self.id, self.username, self.password)
 
-    def validate_password():
-        # validate if password supplied is correct
-        pass
+    def validate_password(self, supplied_password):
+        """ validate if password supplied is correct """
+        return sha256_crypt.verify(supplied_password, self.password)
 
-    def hash_password():
-        self.password = sha256_crypt.encrypt(self.password)
+    def hash_password(self, password):
+        return sha256_crypt.encrypt(password)
 
-    def generate_auth_token():
+    def generate_auth_token(self):
         # generate authentication token based on the unique userid field
         s = Serializer(app.config['SECRET_KEY'], expires_in=600)
-        return s.dumps(self.id)
+        return s.dumps({"id": self.id})
 
     @staticmethod
     # this is static as it is called before the user object is created
-    def verify_auth_token(token):
+    def verify_auth_token(self, userid):
         s = Serializer(app.config['SECRET_KEY'], expires_in=600)
         try:
             # this should return the user id
