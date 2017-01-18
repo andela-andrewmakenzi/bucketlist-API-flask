@@ -64,8 +64,10 @@ class TestBucketList(unittest.TestCase):
         response = self.client.post("/auth/register", data=json.dumps(credentials), content_type="application/json")
         self.assertEqual(response.status_code, 401)
 
-    # def test_register_with_existing_username(self):
-    #     pass
+    def test_register_with_existing_username(self):
+        credentials = {"username": "admin", "password": "admin"}  # this should be the second user we are registering
+        response = self.client.post("/auth/register", data=json.dumps(credentials), content_type="application/json")
+        self.assertEqual(response.status_code, 401)
 
     # def test_create_bucketlist(self):
     #     pass
