@@ -9,7 +9,7 @@ class TestBucketList(unittest.TestCase):
         app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///../testbucketlist.db"
         app.config["TESTING"] = True
         db.drop_all()
-        db.create_all()
+        db.create_all()  # create all tables based 
         new_user = User("admin", "admin")
         db.session.add(new_user)
         db.session.commit()  # user is now in our database
@@ -92,10 +92,10 @@ class TestBucketList(unittest.TestCase):
 
     def test_create_bucketlist(self):
         user = db.session.query(User).filter_by(username="admin").first()
-        token = user.generate_auth_token()  # simulate login
-        credentials = str(token)
+        # token = str(user.generate_auth_token())  # simulate login
+        token = user.generate_auth_token().decode('utf-8')
         bucketname = "games to buy"
-        response = self.client.post("/bucketlists", data=json.dumps({"token": credentials, "name": bucketname}), content_type="application/json")
+        response = self.client.post("/bucketlists", data=json.dumps({"token": token, "name": bucketname}), content_type="application/json")
         self.assertEqual(response.status_code, 201)  # we get this on successful creation
         # also check if there is bucketlist in the db with that name
         name = db.session.query(Bucketlist).filter_by(name=bucketname).first()
@@ -103,10 +103,9 @@ class TestBucketList(unittest.TestCase):
 
     def test_create_bucketlist_no_bucketlistname(self):
         user = db.session.query(User).filter_by(username="admin").first()
-        token = user.generate_auth_token()  # simulate login
-        credentials = str(token)
+        token = str(user.generate_auth_token())  # simulate login
         bucketname = ""  # blank and invalid name
-        response = self.client.post("/bucketlists", data=json.dumps({"token": credentials, "name": bucketname}), content_type="application/json")
+        response = self.client.post("/bucketlists", data=json.dumps({"token": token, "name": bucketname}), content_type="application/json")
         self.assertEqual(response.status_code, 401)  # must supply a name for the bucketlist
 
     # def test_get_bucketlists(self):
@@ -168,6 +167,7 @@ class TestBucketList(unittest.TestCase):
 
     # def test_access_invalid_token():
     #     pass
+
 
 if __name__ == "__main__":
     unittest.main()
