@@ -103,7 +103,7 @@ class TestBucketList(unittest.TestCase):
 
     def test_create_bucketlist_no_bucketlistname(self):
         user = db.session.query(User).filter_by(username="admin").first()
-        token = str(user.generate_auth_token())  # simulate login
+        token = user.generate_auth_token().decode("utf-8")  # simulate login
         bucketname = ""  # blank and invalid name
         response = self.client.post("/bucketlists", data=json.dumps({"token": token, "name": bucketname}), content_type="application/json")
         self.assertEqual(response.status_code, 401)  # must supply a name for the bucketlist
