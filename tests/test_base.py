@@ -18,3 +18,7 @@ class BaseTestCase(unittest.TestCase):
     def tearDown(self):
         db.session.remove()  # will call session remove
         db.drop_all()
+
+
+if __name__ == "main":
+    unittest.main()
