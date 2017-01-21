@@ -4,14 +4,19 @@ from flask import request, jsonify, g, json
 from .model import User
 from flask_httpauth import HTTPTokenAuth
 
-auth = HTTPTokenAuth()
+auth = HTTPTokenAuth(scheme="Bearer")
 db.create_all()
 
 
 @auth.verify_token
 def verify_auth_token(token):
+    """ login_required is going to call verify token since this is an instance
+    of HTTPTokenAuth verify_token is going to look at the value in the
+    Authorization header which we set to Authorization : Bearer <key> according
+    to OAuth 2 standards, parse it for us and return the token part inside of
+    token parameter
+    """
     # they supply a token in place of the username in HTTPBasicAuthentication
-    token = request.json.get("token")
     if not token:
         return False
     userid = User.verify_auth_token(token=token)
@@ -62,7 +67,7 @@ def register():
 @auth.login_required
 def create_bucketlist():
     # we are logged in, we have access to g, where we have a field, g.userid
-    pass
+    return "user {} had been logged in".format(g.user_id)
 
 
 @app.route("/bucketlists", methods=["GET"])
