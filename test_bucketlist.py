@@ -94,9 +94,8 @@ class TestBucketList(unittest.TestCase):
         user = db.session.query(User).filter_by(username="admin").first()
         # token = str(user.generate_auth_token())  # simulate login
         token = user.generate_auth_token().decode('utf-8')
-        print("{} {}".format(token, type(token)))
         bucketname = "games to buy"
-        response = self.client.post("/bucketlists", data=json.dumps({"name": bucketname}), headers="Authorization : Bearer {}".format(token))
+        response = self.client.post("/bucketlists", data=json.dumps({"name": bucketname}), headers={"Authorization": "Bearer {}".format(token)})
         self.assertEqual(response.status_code, 201)  # we get this on successful creation
         # also check if there is bucketlist in the db with that name
         name = db.session.query(Bucketlist).filter_by(name=bucketname).first()
@@ -106,11 +105,15 @@ class TestBucketList(unittest.TestCase):
         user = db.session.query(User).filter_by(username="admin").first()
         token = user.generate_auth_token().decode("utf-8")  # simulate login
         bucketname = ""  # blank and invalid name
-        response = self.client.post("/bucketlists", data=json.dumps({"name": bucketname}), headers="Authorization : Bearer {}".format(token))
+        response = self.client.post("/bucketlists", data=json.dumps({"name": bucketname}), headers={"Authorization": "Bearer {}".format(token)})
         self.assertEqual(response.status_code, 401)  # must supply a name for the bucketlist
 
-    # def test_get_bucketlists(self):
-    #     pass
+    def test_get_bucketlists(self):
+        user = db.session.query(User).filter_by(username="admin").first()
+        token = user.generate_auth_token().decode("utf-8")  # simulate login
+        bucketname = ""  # blank and invalid name
+        response = self.client.post("/bucketlists", data=json.dumps({"name": bucketname}), headers={"Authorization": "Bearer {}".format(token)})
+        self.assertEqual(response.status_code, 401)  # must supply a name for the bucketlists
 
     # def test_get_bucketlists_invalid_id(self):
     #     pass
