@@ -101,13 +101,13 @@ def create_new_item(id, items):
     pass
 
 
-@app.route("/bucketlists/<id>/items/<item_id>", methods=["PUT"])
+@app.route("/bucketlists/<id>/<items>/<item_id>", methods=["PUT"])
 @auth.login_required
 def update_bucket_list_item(id, items, item_id):
     pass
 
 
-@app.route("/bucketlists/<id>/items/<item_id>", methods=["DELETE"])
+@app.route("/bucketlists/<id>/<items>/<item_id>", methods=["DELETE"])
 @auth.login_required
 def delete_bucket_list_item(id, items, item_id):
     pass
