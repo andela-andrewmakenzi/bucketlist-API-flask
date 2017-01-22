@@ -1,6 +1,6 @@
 from bucketlist import app
 import unittest
-from bucketlist.model import db, User
+from bucketlist.models import db, User
 
 
 class BaseTestCase(unittest.TestCase):
@@ -10,7 +10,7 @@ class BaseTestCase(unittest.TestCase):
         app.config["TESTING"] = True
         db.drop_all()
         db.create_all()  # create all tables based
-        new_user = User("admin", "admin")
+        new_user = User(username="admin", password="admin")
         db.session.add(new_user)
         db.session.commit()  # user is now in our database
         self.client = app.test_client()

@@ -1,8 +1,9 @@
 from . import app
-from .model import db
+from .models import db
 from flask import request, jsonify, g, json
-from .model import User
+from .models import User
 from flask_httpauth import HTTPTokenAuth
+import datetime
 
 auth = HTTPTokenAuth(scheme="Bearer")
 db.create_all()
@@ -67,7 +68,7 @@ def register():
 @auth.login_required
 def create_bucketlist():
     # we are logged in, we have access to g, where we have a field, g.userid
-    return "user {} had been logged in".format(g.user_id)
+    pass
 
 
 @app.route("/bucketlists", methods=["GET"])
@@ -78,37 +79,37 @@ def list_created_bucketlist():
 
 @app.route("/bucketlists/<id>", methods=["GET"])
 @auth.login_required
-def get_bucket():
+def get_bucket(id):
     pass
 
 
 @app.route("/bucketlists/<id>", methods=["PUT"])
 @auth.login_required
-def update_bucketlist():
+def update_bucketlist(id):
     pass
 
 
 @app.route("/bucketlists/<id>", methods=["DELETE"])
 @auth.login_required
-def delete_bucketlist():
+def delete_bucketlist(id):
     pass
 
 
 @app.route("/bucketlists/<id>/items/", methods=["POST"])
 @auth.login_required
-def create_new_item():
+def create_new_item(id, items):
     pass
 
 
 @app.route("/bucketlists/<id>/items/<item_id>", methods=["PUT"])
 @auth.login_required
-def update_bucket_list_item():
+def update_bucket_list_item(id, items, item_id):
     pass
 
 
 @app.route("/bucketlists/<id>/items/<item_id>", methods=["DELETE"])
 @auth.login_required
-def delete_bucket_list_item():
+def delete_bucket_list_item(id, items, item_id):
     pass
 
 
@@ -120,4 +121,4 @@ def handle500(e):
 
 @app.errorhandler(404)
 def handle404(e):
-    return jsonify({"message": "Arent you lost ? "}), 404
+    return jsonify({"message": ""}), 404

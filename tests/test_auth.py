@@ -1,6 +1,6 @@
 import unittest
 from bucketlist import app
-from bucketlist.model import db, User, Bucketlist
+from bucketlist.models import db, User, Bucketlist
 from flask import json
 from .test_base import BaseTestCase
 

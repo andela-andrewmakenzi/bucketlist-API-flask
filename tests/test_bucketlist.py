@@ -1,7 +1,8 @@
 from .test_base import BaseTestCase
-from bucketlist.model import db, User, Bucketlist
+from bucketlist.models import db, User, Bucketlist
 from flask import json
 import datetime
+import unittest
 
 
 class TestBucketList(BaseTestCase):
@@ -54,10 +55,11 @@ class TestBucketList(BaseTestCase):
         self.assertTrue(type(response.data) == "json")
 
     def test_get_bucketlists_invalid_id(self):
+        # invalid bucketlist id, bucketlist that does not exist
         self.login_user()
         response = self.client.get("/bucketlists<{}>".format(""), headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 401)
-        self.assertTrue(type(json.loads(response.data)))  # test we return JSON message on error
+        self.assertTrue(type(json.loads(response.data)))  # test we return json contains error
 
     def test_get_bucketlist_unauthorized(self):
         # when  they try to access a resource that is not theirs
@@ -73,16 +75,26 @@ class TestBucketList(BaseTestCase):
         # try to gain access with thier token to admins bucketlist
         response = self.client.get("/bucketlists/1", headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 401)
-        self.assertTrue(type(json.loads(response.data)))  # test we return JSON message on error
+        self.assertTrue(json.loads(response.data))
 
-    # def tests_update_bucketlist(self):
-    #     pass
+    def test_update_bucketlist(self):
+        self.login_user()
+        self.create_bucket()
+        response = self.client.put("/bucketlists/1", data=json.dumps({"name": "newname"}), headers={"Authorization": "Bearer {}".format(self.token)})
+        self.assertEqual(response.status_code, 200)
+        # we need to check that indeed the name was changed
+        r = db.session.query(Bucketlist).filter_by(id=1).first()
+        self.assertTrue(r.name == "newname")
 
-    # def test_update_bucketlist_invalid_id(self):
-    #     pass
+    def tests_update_bucketlist_invalid_id(self):
+        self.login_user()
+        # we dont have any bucketlist in the system
+        response = self.client.put("/bucketlists/1", headers={"Authorization": "Bearer {}".format(self.token)})
+        self.assertEqual(response.status_code, 401)
+        self.assertTrue(json.dumps(response.data))
 
-    # def test_update_bucket_unauthorized(self):
-    #     pass
+    def test_update_bucket_unauthorized(self):
+        pass
 
     # def test_delete_bucketlist(self):
     #     pass
