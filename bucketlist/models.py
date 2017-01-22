@@ -13,20 +13,24 @@ class Bucketlist(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True, nullable=False)
-    data_created = db.Column(db.DateTime, nullable=False)
-    data_modified = db.Column(db.DateTime, nullable=True)
+    date_created = db.Column(db.DateTime, nullable=False)
+    date_modified = db.Column(db.DateTime, nullable=True)
     created_by = db.Column(db.String(20), nullable=False)
     """ creates an association in Items so we can get the
     bucketlist an item belongs to """
     items = db.relationship("Items", backref="bucket", lazy="dynamic")
 
-    def __init__(self, name, date_created, created_by):
+    def __init__(self, name, date_created, created_by, date_modified):
         self.name = name
         self.date_created = date_created
         self.created_by = created_by
+        self.date_modified = date_modified
 
     def __repr__(self):
         return "<{} {} {} {} {} >".format(self.id, self.name, self.date_created, self.date_modified, self.created_by)
+
+    def set_last_modified_date(self, date):
+        self.date_modified = date
 
 
 class Items(db.Model):
@@ -35,18 +39,23 @@ class Items(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(50), nullable=False)
-    dated_created = db.Column(db.DateTime, nullable=False)
+    date_created = db.Column(db.DateTime, nullable=False)
     date_modified = db.Column(db.DateTime, nullable=True)
     done = db.Column(db.Boolean, nullable=False, unique=False, default=False)
     bucketlistid = db.Column(db.Integer, db.ForeignKey("Bucketlist.id"), nullable=False, unique=False)
 
-    def __init__(self, name, date_created, done=False):
+    def __init__(self, name, date_created, date_modified, bucketlistid, done=False):
         self.name = name
         self.date_created = date_created
         self.done = done
+        self.date_modified = date_modified
+        self.bucketlistid = bucketlistid
 
     def __repr__(self):
         return "<{} {} {} {} {} >".format(self.userid, self.name, self.date_created, self.date_modified, self.done)
+
+    def set_last_modified_date(self, date):
+        self.date_modified = date
 
 
 class User(db.Model):
