@@ -19,9 +19,9 @@ class TestBucketList(BaseTestCase):
         db.session.add(new_user)
         db.session.commit()
         self.new_user = db.session.query(User).filter_by(username="testuser").first()
-        self.token = new_user.generate_auth_token().decode("utf-8")"""
-        we use this new user when we are going to be testing if a user can do something to a bucketlist
-        that does not belong to them"""
+        self.token = new_user.generate_auth_token().decode("utf-8")
+        """we use this new user when we are going to be testing if a user can do
+        something to a bucketlist that does not belong to them"""
 
     def test_access_route_invalid_token(self):
         self.login_user()
@@ -115,14 +115,27 @@ class TestBucketList(BaseTestCase):
         self.assertEqual(response.status_code, 401)
         self.assertTrue(json.loads(response.data))
 
-    # def test_delete_bucketlist(self):
-    #     pass
+    def test_delete_bucketlist(self):
+        self.login_user()
+        self.create_bucket()
+        response = self.client.delete("/bucketlists/1", headers={"Authorization": "Bearer {}".format(self.token)})
+        self.assertEqual(response.status_code, 200)
 
-    # def test_delete_bucketlist_invalid_id(self):
-    #     pass
+    def test_delete_bucketlist_invalid_id(self):
+        self.login_user()
+        # there is no bucketlist in the system
+        response = self.client.delete("/bucketlists/1", headers={"Authorization": "Bearer {}".format(self.token)})
+        self.assertEqual(response.status_code, 401)
+        self.assertTrue(json.loads(response.data))
 
-    # def test_delete_bucketlist_unauthorized(self):
-    #     pass
+    def test_delete_bucketlist_unauthorized(self):
+        # when a user tries to delete another users bucketlist
+        self.login_user()
+        self.create_bucket()
+        self.create_user()  # the new user who should not have access to this bucketlist
+        response = self.client.put("/bucketlists/1", headers={"Authorization": "Bearer {}".format(self.token)})
+        self.assertEqual(response.status_code, 401)
+        self.assertTrue(json.loads(response.data))
 
     # def test_create_new_item_bucketlist(self):
     #     pass
@@ -156,7 +169,6 @@ class TestBucketList(BaseTestCase):
 
     # def test_access_invalid_token():
     #     pass
-
 
 if __name__ == "__main__":
     unittest.main()
