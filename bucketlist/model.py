@@ -1,5 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 from . import app
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
 from passlib.hash import sha256_crypt
@@ -15,14 +14,15 @@ class Bucketlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True, nullable=False)
     data_created = db.Column(db.DateTime, nullable=False)
-    data_modified = db.Column(db.DateTime, nullable=False)
+    data_modified = db.Column(db.DateTime, nullable=True)
     created_by = db.Column(db.String(20), nullable=False)
+    """ creates an association in Items so we can get the
+    bucketlist an item belongs to """
     items = db.relationship("Items", backref="bucket", lazy="dynamic")
 
-    def __init__(self, name, date_created, date_modified, created_by):
+    def __init__(self, name, date_created, created_by):
         self.name = name
         self.date_created = date_created
-        self.date_modified = date_modified
         self.created_by = created_by
 
     def __repr__(self):
@@ -36,14 +36,13 @@ class Items(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(50), nullable=False)
     dated_created = db.Column(db.DateTime, nullable=False)
-    date_modified = db.Column(db.DateTime, nullable=False)
+    date_modified = db.Column(db.DateTime, nullable=True)
     done = db.Column(db.Boolean, nullable=False, unique=False, default=False)
     bucketlistid = db.Column(db.Integer, db.ForeignKey("Bucketlist.id"), nullable=False, unique=False)
 
-    def __init__(self, name, date_created, date_modified, done):
+    def __init__(self, name, date_created, done=False):
         self.name = name
         self.date_created = date_created
-        self.date_modified = date_modified
         self.done = done
 
     def __repr__(self):
