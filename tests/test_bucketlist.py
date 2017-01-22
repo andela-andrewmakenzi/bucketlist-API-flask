@@ -1,7 +1,7 @@
 from .test_base import BaseTestCase
-from bucketlist.models import db, User, Bucketlist
+from bucketlist.models import db, User, Bucketlist, Items
 from flask import json
-import datetime
+from datetime import datetime
 import unittest
 
 
@@ -11,8 +11,15 @@ class TestBucketList(BaseTestCase):
         self.user = db.session.query(User).filter_by(username="admin").first()
         self.token = self.user.generate_auth_token().decode("utf-8")  # simulate login
 
-    def create_bucket(self):
-        self.new_bucketlist = Bucketlist(name="testbucketlist", date_created="asd", created_by=self.user.username)
+    def create_bucketlist(self):
+        self.new_bucketlist = Bucketlist(name="testbucketlist", date_created=datetime.now(), created_by=self.user.username, date_modified=datetime.now())
+        db.session.add(self.new_bucketlist)
+        db.session.commit()
+
+    def create_bucketlist_item(self):
+        self.new_item = Items(name="cook something", date_created=datetime.now(), bucketlistid=1, date_modified=datetime.now())
+        db.session.add(self.new_item)
+        db.session.commit()
 
     def create_user(self):
         new_user = User(username="testuser", password="testuser")
@@ -53,27 +60,29 @@ class TestBucketList(BaseTestCase):
 
     def test_get_bucketlists(self):
         self.login_user()
+        self.create_bucketlist()  # the only bucketlist we have, test if it will be returned
         response = self.client.get("/bucketlists", headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(json.loads(response.data))  # we are going to fetch every single bucketlist that belongs to them
 
     def test_get_bucketlists_with_id(self):
         self.login_user()
-        response = self.client.get("/bucketlists<{}>".format(self.user.id), headers={"Authorization": "Bearer {}".format(self.token)})
+        self.create_bucketlist()
+        response = self.client.get("/bucketlists/1", headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(type(response.data) == "json")
+        self.assertTrue(json.loads(response.data))
 
     def test_get_bucketlists_invalid_id(self):
         # invalid bucketlist id, bucketlist that does not exist
         self.login_user()
-        response = self.client.get("/bucketlists<{}>".format(""), headers={"Authorization": "Bearer {}".format(self.token)})
+        response = self.client.get("/bucketlists/<1>", headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 401)
         self.assertTrue(type(json.loads(response.data)))  # test we return json contains error
 
     def test_get_bucketlist_unauthorized(self):
         # when  they try to access a resource that is not theirs
         self.login_user()
-        self.create_bucket()  # the only bucketlist in the systen, belonging to admin
+        self.create_bucketlist()  # the only bucketlist in the systen, belonging to admin
         """ the bucketlist belongs to member one, i.e admin
         created another user and attempt to access the bucketlist """
         self.create_user()
@@ -84,7 +93,7 @@ class TestBucketList(BaseTestCase):
 
     def test_update_bucketlist(self):
         self.login_user()
-        self.create_bucket()
+        self.create_bucketlist()
         response = self.client.put("/bucketlists/1", data=json.dumps({"name": "newname"}), headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 200)
         # we need to check that indeed the name was changed
@@ -101,7 +110,7 @@ class TestBucketList(BaseTestCase):
     def test_update_bucket_unauthorized(self):
         # when a user tries to get another users bucketlist
         self.login_user()
-        self.create_bucket()
+        self.create_bucketlist()
         self.create_user()  # the new user who should not have access to this bucketlist
         response = self.client.put("/bucketlists/1", data=json.dumps({"name": "newname"}), headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 401)
@@ -109,7 +118,7 @@ class TestBucketList(BaseTestCase):
 
     def test_update_bucketlist_wrong_parameters(self):
         self.login_user()
-        self.create_bucket()
+        self.create_bucketlist()
         # pass non existing parameter in json body before update
         response = self.client.put("/bucketlists/1", data=json.dumps({"sajdkbasjkd": "newname"}), headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 401)
@@ -117,9 +126,11 @@ class TestBucketList(BaseTestCase):
 
     def test_delete_bucketlist(self):
         self.login_user()
-        self.create_bucket()
+        self.create_bucketlist()
         response = self.client.delete("/bucketlists/1", headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 200)
+        r = db.session.query(Bucketlist).filter_by(name="testbucketlist").first()
+        self.assertTrue(r is None)
 
     def test_delete_bucketlist_invalid_id(self):
         self.login_user()
@@ -133,42 +144,59 @@ class TestBucketList(BaseTestCase):
         self.login_user()
         self.create_bucket()
         self.create_user()  # the new user who should not have access to this bucketlist
-        response = self.client.put("/bucketlists/1", headers={"Authorization": "Bearer {}".format(self.token)})
+        response = self.client.delete("/bucketlists/1", headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 401)
         self.assertTrue(json.loads(response.data))
 
-    # def test_create_new_item_bucketlist(self):
-    #     pass
+    def test_create_new_item_bucketlist(self):
+        self.login_user()
+        self.create_bucketlist()
+        """ test if we can created a new item in the bucketlist created above """
+        response = self.client.post("/bucketlists/1/items", data=json.dumps({"name": "do this", "date_created": "asd", "bucketlist_id": 1}), headers={"Authorization": "Bearer {}".format(self.token)})
+        self.assertEqual(response.status_code, 200)
+        bucketlist = db.session.query(Bucketlist).filter_by(name="testbucketlist").first()
+        self.assertTrue(bucketlist.items[0].name == "do this")
 
-    # def test_create_bucketlist_item_no_name(self):
-    #     pass
+    def test_create_bucketlist_item_no_name(self):
+        self.login_user()
+        self.create_bucketlist()
+        """ test if we can created a new item in the bucketlist created above """
+        response = self.client.post("/bucketlists/1/items", data=json.dumps({"name": "", "date_created": "asd", "bucketlist_id": 1}), headers={"Authorization": "Bearer {}".format(self.token)})
+        self.assertEqual(response.status_code, 401)
+        self.assertTrue(json.loads(response.data))
 
-    # def test_create_bucketlist_item_unauthorized(self):
-    #     pass
+    def test_update_item_bucketlist(self):
+        self.login_user()
+        self.create_bucketlist()
+        self.create_bucketlist_item()
+        response = self.client.put("/bucketlists/1/items/1", data=json.dumps({"name": "do this", "date_created": "asd", "bucketlist_id": 1}), headers={"Authorization": "Bearer {}".format(self.token)})
+        self.assertEqual(response.staus_code, 200)
 
-    # def test_update_item_bucketlist(self):
-    #     pass
+    def test_update_bucketlist_item_invalid_id(self):
+        self.login_user()
+        self.create_bucketlist()
+        # there is no item to delete in database we are itempting to delete item id 1
+        response = self.client.put("/bucketlists/1/items/1", data=json.dumps({"name": "do this", "date_created": "asd", "bucketlist_id": 1}), headers={"Authorization": "Bearer {}".format(self.token)})
+        self.assertEqual(response.staus_code, 401)
+        self.assertTrue(json.loads(response.data))
 
-    # def test_update_bucketlist_item_invalid_id(self):
-    #     pass
+    def test_delete_item_bucketlist(self):
+        self.login_user()
+        self.create_bucketlist()
+        self.create_bucketlist_item()
+        response = self.client.delete("/bucketlists/1/items/1", headers={"Authorization": "Bearer {}".format(self.token)})
+        self.assertEqual(response.status_code, 200)
+        item = db.session.query(Items).get(1)
+        self.assertTrue(item is None)
 
-    # def test_update_bucketlist_unauthorized(self):
-    #     pass
+    def test_delete_bucketlist_item_invalid_id(self):
+        self.login_user()
+        self.create_bucketlist()
+        # no item to delete in database
+        response = self.client.delete("/bucketlists/1/items/1", headers={"Authorization": "Bearer {}".format(self.token)})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(json.loads(response.data))
 
-    # def test_delete_item_bucketlist(self):
-    #     pass
-
-    # def test_delete_bucketlist_item_invalid_id(self):
-    #     pass
-
-    # def test_delete_bucketlist_item_unauthorized(self):
-    #     pass
-
-    # def test_access_expired_token():
-    #     pass
-
-    # def test_access_invalid_token():
-    #     pass
 
 if __name__ == "__main__":
     unittest.main()
