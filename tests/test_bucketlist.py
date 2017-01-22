@@ -1,6 +1,7 @@
 from .test_base import BaseTestCase
 from bucketlist.model import db, User, Bucketlist
 from flask import json
+import datetime
 
 
 class TestBucketList(BaseTestCase):
@@ -9,6 +10,9 @@ class TestBucketList(BaseTestCase):
         self.user = db.session.query(User).filter_by(username="admin").first()
         self.token = self.user.generate_auth_token().decode("utf-8")  # simulate login
 
+    def create_bucket(self):
+        self.new_bucketlist = Bucketlist(name="testbucketlist", date_created="asd", created_by=self.user.username)
+
     def test_access_route_invalid_token(self):
         self.login_user()
         self.token = ""
@@ -16,7 +20,7 @@ class TestBucketList(BaseTestCase):
         response1 = self.client.post("/bucketlists", data=json.dumps({"name": bucketname}), headers={"Authorization": "Bearer {}".format(self.token)})
         response2 = self.client.get("/bucketlists", data=json.dumps({"name": bucketname}), headers={"Authorization": "Bearer {}".format(self.token)})
         response3 = self.client.put("/bucketlists/<1>", data=json.dumps({"name": bucketname}), headers={"Authorization": "Bearer {}".format(self.token)})
-        response4 = self.client.delete("/bucketlists", data=json.dumps({"name": bucketname}), headers={"Authorization": "Bearer {}".format(self.token)})
+        response4 = self.client.delete("/bucketlists/<1>", data=json.dumps({"name": bucketname}), headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response1.status_code, 401)
         self.assertEqual(response2.status_code, 401)
         self.assertEqual(response3.status_code, 401)
@@ -58,7 +62,16 @@ class TestBucketList(BaseTestCase):
     def test_get_bucketlist_unauthorized(self):
         # when  they try to access a resource that is not theirs
         self.login_user()
-        response = self.client.get("/bucketlists/<{}>".format(self.user.id), headers={"Authorization": "Bearer {}".format(self.token)})
+        self.create_bucket()  # the only bucketlist in the systen, belonging to admin
+        """ the bucketlist belongs to member one, i.e admin
+        created another user and attempt to access the bucketlist """
+        new_user = User(username="test", password="test")
+        db.session.add(new_user)
+        db.session.commit()
+        new_user = db.session.query(User).filter_by(username="test").first()
+        self.token = new_user.generate_auth_token().decode("utf-8")
+        # try to gain access with thier token to admins bucketlist
+        response = self.client.get("/bucketlists/1", headers={"Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 401)
         self.assertTrue(type(json.loads(response.data)))  # test we return JSON message on error
 
