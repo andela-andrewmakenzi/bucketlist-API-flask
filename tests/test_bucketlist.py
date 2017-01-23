@@ -16,7 +16,7 @@ class TestBucketList(BaseTestCase):
         self.new_bucketlist = Bucketlist(
             name="testbucketlist",
             date_created=datetime.now(),
-            created_by=self.user.username,
+            created_by=self.user.id,
             date_modified=datetime.now())
         db.session.add(self.new_bucketlist)
         db.session.commit()
@@ -88,6 +88,7 @@ class TestBucketList(BaseTestCase):
         self.create_bucketlist()
         response = self.client.get("/bucketlists", headers={
             "Authorization": "Bearer {}".format(self.token)})
+        print(response.data)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(type(json.loads(response.data) == "json"))
 
