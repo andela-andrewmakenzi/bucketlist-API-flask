@@ -1,9 +1,10 @@
 from . import app
 from .models import db
 from flask import request, jsonify, g, json
-from .models import User
+from .models import User, Bucketlist, Items
 from flask_httpauth import HTTPTokenAuth
 import datetime
+from datetime import datetime
 
 auth = HTTPTokenAuth(scheme="Bearer")
 db.create_all()
@@ -23,7 +24,7 @@ def verify_auth_token(token):
     userid = User.verify_auth_token(token=token)
     if userid is None:
         return False
-    g.user_id = userid  # store userid in thread safe request aware g
+    g.user = db.session.query(User).filter_by(id=userid).first()
     return True
 
 
@@ -68,7 +69,14 @@ def register():
 @auth.login_required
 def create_bucketlist():
     # we are logged in, we have access to g, where we have a field, g.userid
-    pass
+    if not request.json or request.json.get("name") == "":
+        return jsonify({
+            "message": "You are require to supply the name of the bucketlist"
+            }), 401
+    bl = Bucketlist(name=request.json.get("name"), date_created=datetime.now(), created_by=g.user.id, date_modified=datetime.now())
+    db.session.add(bl)
+    db.session.commit()
+    return jsonify({"message":"Added bucketlist for use"}), 201
 
 
 @app.route("/bucketlists", methods=["GET"])
