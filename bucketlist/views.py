@@ -112,13 +112,12 @@ def get_bucket(itemid):
 @app.route("/bucketlists/<id>", methods=["PUT"])
 @auth.login_required
 def update_bucketlist(id):
-    if not request.json or request.json.get("name") is None:
+    if not request.json or request.json.get("name") is None or request.json.get("name") == "":
         return jsonify({"message": "you need to supply new edits in json"}), 401
     bl = db.session.query(Bucketlist).filter_by(id=id).first()
     if not bl:
         return jsonify({"message": "The item you request does not exist"}), 401
     if not bl.created_by == g.user.id:
-        return "asdassd"
         return jsonify({"message": "You don't have permission to modify this item"}), 401
     bl.name = request.json.get("name")
     db.session.commit()
@@ -128,7 +127,14 @@ def update_bucketlist(id):
 @app.route("/bucketlists/<id>", methods=["DELETE"])
 @auth.login_required
 def delete_bucketlist(id):
-    pass
+    bl = db.session.query(Bucketlist).filter_by(id=id).first()
+    if not bl:
+        return jsonify({"message": "The item you request does not exist"}), 401
+    if not bl.created_by == g.user.id:
+        return jsonify({"message": "You don't have permission to modify this item"}), 401
+    db.session.delete(bl)
+    db.session.commit()
+    return jsonify({"message": "Deleted bucketlist"}), 200
 
 
 @app.route("/bucketlists/<id>/items/", methods=["POST"])
