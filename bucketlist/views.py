@@ -84,21 +84,27 @@ def create_bucketlist():
 def list_created_bucketlist():
     """ return the bucketlists belonging to the user """
     ls = []
-    bl = db.session.query(Bucketlist).filter_by(created_by=1).all()
+    # filter only the ones belonging to the user
+    bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id).all()
+    if not bl:
+        return jsonify({"message": "user has not created any items yet"}), 401
     for item in bl:
         ls.append(item.returnthis())
     return jsonify(ls), 200
 
 
-@app.route("/bucketlists/<id>", methods=["GET"])
+@app.route("/bucketlists/<itemid>", methods=["GET"])
 @auth.login_required
-def get_bucket(id):
+def get_bucket(itemid):
     """ return the certain bucketlist for user """
-    bls = []
-    bl = db.session.query(Bucketlist).filter_by(created_by=1).all()
-    bls.append(bl)
-    return jsonify(bls), 200
-    return "done"
+    ls = []
+    bl = db.session.query(Bucketlist).get(itemid)
+    if not bl:
+        return jsonify({"message": "No item with that id"}), 401
+    if not bl.created_by == g.user.id:
+        return jsonify({"message": "That item does not belong to you {} {}".format(type(bl.created_by), type(g.user.id))}), 401
+    ls.append(bl.returnthis())
+    return jsonify(ls), 200
 
 
 @app.route("/bucketlists/<id>", methods=["PUT"])
