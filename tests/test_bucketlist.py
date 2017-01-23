@@ -79,7 +79,8 @@ class TestBucketList(BaseTestCase):
         bucketname = ""  # blank and invalid name
         response = self.client.post(
             "/bucketlists", data=json.dumps({"name": bucketname}),
-            headers={"Authorization": "Bearer {}".format(self.token)})
+            headers={"Authorization": "Bearer {}".format(self.token)},
+            content_type="application/json")
         self.assertEqual(response.status_code, 401)
 
     def test_get_bucketlists(self):
@@ -88,7 +89,7 @@ class TestBucketList(BaseTestCase):
         response = self.client.get("/bucketlists", headers={
             "Authorization": "Bearer {}".format(self.token)})
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(json.loads(response.data))
+        self.assertTrue(type(json.loads(response.data) == "json"))
 
     def test_get_bucketlists_with_id(self):
         self.login_user()
