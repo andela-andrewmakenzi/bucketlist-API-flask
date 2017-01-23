@@ -83,17 +83,22 @@ def create_bucketlist():
 @auth.login_required
 def list_created_bucketlist():
     """ return the bucketlists belonging to the user """
-    bls = []
+    ls = []
     bl = db.session.query(Bucketlist).filter_by(created_by=1).all()
-    bls.append(bl)
-    return jsonify(bls), 200
-    return "done"
+    for item in bl:
+        ls.append(item.returnthis())
+    return jsonify(ls), 200
 
 
 @app.route("/bucketlists/<id>", methods=["GET"])
 @auth.login_required
 def get_bucket(id):
-    pass
+    """ return the certain bucketlist for user """
+    bls = []
+    bl = db.session.query(Bucketlist).filter_by(created_by=1).all()
+    bls.append(bl)
+    return jsonify(bls), 200
+    return "done"
 
 
 @app.route("/bucketlists/<id>", methods=["PUT"])
