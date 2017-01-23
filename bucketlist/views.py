@@ -76,13 +76,18 @@ def create_bucketlist():
     bl = Bucketlist(name=request.json.get("name"), date_created=datetime.now(), created_by=g.user.id, date_modified=datetime.now())
     db.session.add(bl)
     db.session.commit()
-    return jsonify({"message":"Added bucketlist for use"}), 201
+    return jsonify({"message": "Added bucketlist for use"}), 201
 
 
 @app.route("/bucketlists", methods=["GET"])
 @auth.login_required
 def list_created_bucketlist():
-    pass
+    """ return the bucketlists belonging to the user """
+    bls = []
+    bl = db.session.query(Bucketlist).filter_by(created_by=1).all()
+    bls.append(bl)
+    return jsonify(bls), 200
+    return "done"
 
 
 @app.route("/bucketlists/<id>", methods=["GET"])
