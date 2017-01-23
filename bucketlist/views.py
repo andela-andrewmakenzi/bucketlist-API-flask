@@ -120,6 +120,7 @@ def update_bucketlist(id):
     if not bl.created_by == g.user.id:
         return jsonify({"message": "You don't have permission to modify this item"}), 401
     bl.name = request.json.get("name")
+    bl.date_modified = datetime.now()
     db.session.commit()
     return jsonify({"message": "successful update"}), 200
 
@@ -164,10 +165,28 @@ def create_new_item(id):
     return jsonify({"message": "Successfuly created item"}), 200
 
 
-@app.route("/bucketlists/<id>/<items>/<item_id>", methods=["PUT"])
+@app.route("/bucketlists/<id>/items/<item_id>", methods=["PUT"])
 @auth.login_required
-def update_bucket_list_item(id, items, item_id):
-    pass
+def update_bucket_list_item(id, item_id):
+    if not request.json:
+        return jsonify(
+            {"message": "you need to supply new name as JSON"}), 401
+    item_name = request.json.get("name")
+    if item_name is None or item_name == "":
+        return jsonify({"message": "you need to supply new name as JSON"}), 401
+    bl = db.session.query(Bucketlist).filter_by(id=id).first()
+    if not bl:
+        return jsonify({
+            "message": "cannot create item in that bucketlist, might have been deleted"}), 401
+    bli = db.session.query(Items).filter_by(id=id).first()
+    if not bli:
+        return jsonify({"message": "User does not have that item, cannot update"}), 401
+    if bli.name == item_name:
+        return jsonify({"message": "No change to be recorded, update"}), 401
+    bli.name = item_name
+    bli.date_modified = datetime.now()
+    db.session.commit()
+    return jsonify({"message": "Successfully updated item"}), 200
 
 
 @app.route("/bucketlists/<id>/<items>/<item_id>", methods=["DELETE"])
