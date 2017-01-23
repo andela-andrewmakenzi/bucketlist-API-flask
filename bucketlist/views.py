@@ -131,16 +131,37 @@ def delete_bucketlist(id):
     if not bl:
         return jsonify({"message": "The item you request does not exist"}), 401
     if not bl.created_by == g.user.id:
-        return jsonify({"message": "You don't have permission to modify this item"}), 401
+        return jsonify(
+            {"message": "You don't have permission to modify this item"}), 401
     db.session.delete(bl)
     db.session.commit()
     return jsonify({"message": "Deleted bucketlist"}), 200
 
 
-@app.route("/bucketlists/<id>/items/", methods=["POST"])
+@app.route("/bucketlists/<id>/items", methods=["POST"])
 @auth.login_required
-def create_new_item(id, items):
-    pass
+def create_new_item(id):
+    if not request.json:
+        return jsonify(
+            {"message": "you need to supply name of new item as JSON"}), 401
+    item_name = request.json.get("name")
+    if item_name is None or item_name == "":
+        return jsonify({"message": "you need to supply name of new item as JSON"}), 401
+    bl = db.session.query(Items).filter_by(name=item_name).first()
+    if bl:
+        return jsonify({"message": "User has already created that item"}), 401
+    bl = db.session.query(Bucketlist).filter_by(id=id).first()
+    if not bl:  # if the bucketlist they are trying to create in does not exist
+        return jsonify({"message": "Bucketlist does not exist"}), 401
+    new_item = Items(
+        name=item_name,
+        date_created=datetime.now(),
+        date_modified=datetime.now(),
+        bucketlistid=id
+        )
+    db.session.add(new_item)
+    db.session.commit()
+    return jsonify({"message": "Successfuly created item"}), 200
 
 
 @app.route("/bucketlists/<id>/<items>/<item_id>", methods=["PUT"])
