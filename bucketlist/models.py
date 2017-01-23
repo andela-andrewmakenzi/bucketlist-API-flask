@@ -15,7 +15,7 @@ class Bucketlist(db.Model):
     name = db.Column(db.String(20), unique=True, nullable=False)
     date_created = db.Column(db.DateTime, nullable=False)
     date_modified = db.Column(db.DateTime, nullable=True)
-    created_by = db.Column(db.String(20), nullable=False)
+    created_by = db.Column(db.Integer, nullable=False)
     """ creates an association in Items so we can get the
     bucketlist an item belongs to """
     items = db.relationship("Items", backref="bucket", lazy="dynamic")
@@ -31,6 +31,14 @@ class Bucketlist(db.Model):
 
     def set_last_modified_date(self, date):
         self.date_modified = date
+
+    def returnthis(self):
+        return {
+            "name": self.name,
+            "date_created": self.date_created,
+            "date_modified": self.date_modified,
+            "created_by": self.created_by
+        }
 
 
 class Items(db.Model):
@@ -82,13 +90,13 @@ class User(db.Model):
 
     def generate_auth_token(self):
         # generate authentication token based on the unique userid field
-        s = Serializer(app.config['SECRET_KEY'], expires_in=600)
+        s = Serializer(app.config['SECRET_KEY'], expires_in=6000)
         return s.dumps({"id": self.id})  # this is going to be binary
 
     @staticmethod
     # this is static as it is called before the user object is created
     def verify_auth_token(token):
-        s = Serializer(app.config['SECRET_KEY'], expires_in=600)
+        s = Serializer(app.config['SECRET_KEY'], expires_in=6000)
         try:
             # this should return the user id
             user = s.loads(token)
