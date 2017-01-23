@@ -69,7 +69,7 @@ def register():
 @auth.login_required
 def create_bucketlist():
     # we are logged in, we have access to g, where we have a field, g.userid
-    if not request.json or request.json.get("name") == "":
+    if not request.json or request.json.get("name") is None or request.json.get("name") == "":
         return jsonify({
             "message": "You are require to supply the name of the bucketlist"
             }), 401
@@ -102,7 +102,9 @@ def get_bucket(itemid):
     if not bl:
         return jsonify({"message": "No item with that id"}), 401
     if not bl.created_by == g.user.id:
-        return jsonify({"message": "That item does not belong to you {} {}".format(type(bl.created_by), type(g.user.id))}), 401
+        return jsonify({
+            "message": "That item does not belong to you {} {}".format(type(
+                bl.created_by), type(g.user.id))}), 401
     ls.append(bl.returnthis())
     return jsonify(ls), 200
 
@@ -110,7 +112,17 @@ def get_bucket(itemid):
 @app.route("/bucketlists/<id>", methods=["PUT"])
 @auth.login_required
 def update_bucketlist(id):
-    pass
+    if not request.json or request.json.get("name") is None:
+        return jsonify({"message": "you need to supply new edits in json"}), 401
+    bl = db.session.query(Bucketlist).filter_by(id=id).first()
+    if not bl:
+        return jsonify({"message": "The item you request does not exist"}), 401
+    if not bl.created_by == g.user.id:
+        return "asdassd"
+        return jsonify({"message": "You don't have permission to modify this item"}), 401
+    bl.name = request.json.get("name")
+    db.session.commit()
+    return jsonify({"message": "successful update"}), 200
 
 
 @app.route("/bucketlists/<id>", methods=["DELETE"])
