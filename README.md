@@ -26,7 +26,7 @@ Follow the following steps to have the system running:
 * Navigate to the application directory:
 
 ```
-cd amity
+cd flaskbucketlist
 ```
 
 * Create a virtual environment to install the
