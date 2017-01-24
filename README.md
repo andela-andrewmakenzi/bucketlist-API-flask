@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/andela-andrewmakenzi/flask-bucketlist.svg?branch=develop&u=1)](https://travis-ci.org/andela-andrewmakenzi/flask-bucketlist)
+[![Coveralls](https://img.shields.io/coveralls/andela-andrewmakenzi/flaskbucketlist.svg)]()
 
 ## Introduction
 
