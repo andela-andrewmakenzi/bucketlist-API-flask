@@ -83,9 +83,14 @@ def create_bucketlist():
 @auth.login_required
 def list_created_bucketlist():
     """ return the bucketlists belonging to the user """
+    bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id)
+    if request.args.get("limit"):
+        l = request.args.get("limit")
+        bl.limit(l).all()
+    else:
+        # filter only the ones belonging to the user
+        bl.all()
     ls = []
-    # filter only the ones belonging to the user
-    bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id).all()
     if not bl:
         return jsonify({"message": "user has not created any items yet"}), 401
     for item in bl:
