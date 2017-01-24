@@ -83,13 +83,22 @@ def create_bucketlist():
 @auth.login_required
 def list_created_bucketlist():
     """ return the bucketlists belonging to the user """
-    bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id)
+    # filter_by(created_by=g.user.id)
+    # bl = db.session.query(Bucketlist)
+    search_name = False
+    search_limit = False
+    if request.args.get("q"):
+        search_name = True
     if request.args.get("limit"):
-        l = request.args.get("limit")
-        bl.limit(l).all()
+        search_limit = True
+    if search_name and search_limit:
+        bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id, name=request.args.get("q")).limit(request.args.get("limit")).all()
+    elif search_name:
+        bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id, name=request.args.get("q")).all()
+    elif search_limit:
+        bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id).limit(request.args.get("limit")).all()
     else:
-        # filter only the ones belonging to the user
-        bl.all()
+        bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id).all()
     ls = []
     if not bl:
         return jsonify({"message": "user has not created any items yet"}), 401
