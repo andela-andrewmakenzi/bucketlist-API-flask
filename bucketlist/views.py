@@ -73,6 +73,10 @@ def create_bucketlist():
         return jsonify({
             "message": "You are require to supply the name of the bucketlist"
             }), 401
+    bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id, name=request.json.get("name")).first()
+    if bl:
+        return jsonify({
+            "message": "The item you are trying to create already exists"}), 401
     bl = Bucketlist(name=request.json.get("name"), date_created=datetime.now(), created_by=g.user.id, date_modified=datetime.now())
     db.session.add(bl)
     db.session.commit()
@@ -83,8 +87,6 @@ def create_bucketlist():
 @auth.login_required
 def list_created_bucketlist():
     """ return the bucketlists belonging to the user """
-    # filter_by(created_by=g.user.id)
-    # bl = db.session.query(Bucketlist)
     search_name = False
     search_limit = False
     if request.args.get("q"):
@@ -228,4 +230,4 @@ def handle500(e):
 
 @app.errorhandler(404)
 def handle404(e):
-    return jsonify({"message": ""}), 404
+    return jsonify({"message": "Invalid endpoint"}), 404
