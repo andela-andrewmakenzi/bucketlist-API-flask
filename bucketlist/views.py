@@ -178,7 +178,7 @@ def update_bucket_list_item(id, item_id):
     if not bl:
         return jsonify({
             "message": "cannot create item in that bucketlist, might have been deleted"}), 401
-    bli = db.session.query(Items).filter_by(id=id).first()
+    bli = db.session.query(Items).filter_by(id=item_id).first()
     if not bli:
         return jsonify({"message": "User does not have that item, cannot update"}), 401
     if bli.name == item_name:
@@ -189,10 +189,21 @@ def update_bucket_list_item(id, item_id):
     return jsonify({"message": "Successfully updated item"}), 200
 
 
-@app.route("/bucketlists/<id>/<items>/<item_id>", methods=["DELETE"])
+@app.route("/bucketlists/<id>/items/<item_id>", methods=["DELETE"])
 @auth.login_required
-def delete_bucket_list_item(id, items, item_id):
-    pass
+def delete_bucket_list_item(id, item_id):
+    bl = db.session.query(Bucketlist).filter_by(id=id).first()
+    if not bl:
+        return jsonify({"message": "Bucketlist does not exist, cannot delete"}), 401
+    if not bl.created_by == g.user.id:
+        return jsonify({
+            "message": "You dont own the bucketlist, cannot delete"}), 401
+    bli = db.session.query(Items).filter_by(id=item_id).first()
+    if not bli:
+        return jsonify({"message": "User does not have that item, cannot delete"}), 401
+    db.session.delete(bli)
+    db.session.commit()
+    return jsonify({"message": "Successfully deleted item"}), 200
 
 
 @app.errorhandler(500)
