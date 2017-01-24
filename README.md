@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/andela-andrewmakenzi/flask-bucketlist.svg?branch=develop&u=1)](https://travis-ci.org/andela-andrewmakenzi/flask-bucketlist)
 [![Code Climate](https://codeclimate.com/github/andela-andrewmakenzi/flask-bucketlist/badges/gpa.svg)](https://codeclimate.com/github/andela-andrewmakenzi/flask-bucketlist)
+[![license](https://img.shields.io/github/license/andela-andrewmakenzi/flask-bucketlist.svg)]()
 ## Introduction
-
 Flask API
 
 #### URL endpoints
