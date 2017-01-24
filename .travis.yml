@@ -1,7 +1,5 @@
 language: python
 python:
-    - python 3
-before_script:
-    - pip install -r requirements.txt
-script:
-    - python run.py
+    - python 3.5.2
+install: pip install -r requirements.txt
+script: pytest
