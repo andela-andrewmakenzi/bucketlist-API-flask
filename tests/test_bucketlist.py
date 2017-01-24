@@ -204,9 +204,10 @@ class TestBucketList(BaseTestCase):
         response = self.client.post(
             "/bucketlists/1/items",
             data=json.dumps(
-                {"name": "do this", "date_created": "asd", "bucketlist_id": 1}
+                {"name": "do this"}
                 ),
-            headers={"Authorization": "Bearer {}".format(self.token)})
+            headers={"Authorization": "Bearer {}".format(self.token)},
+            content_type="application/json")
         self.assertEqual(response.status_code, 200)
         bucketlist = db.session.query(
             Bucketlist).filter_by(name="testbucketlist").first()
@@ -218,7 +219,8 @@ class TestBucketList(BaseTestCase):
         # test if we can created a new item in the bucketlist created above
         response = self.client.post("/bucketlists/1/items", data=json.dumps(
             {"name": "", "date_created": "asd", "bucketlist_id": 1}),
-            headers={"Authorization": "Bearer {}".format(self.token)})
+            headers={"Authorization": "Bearer {}".format(self.token)},
+            content_type="application/json")
         self.assertEqual(response.status_code, 401)
         self.assertTrue(type(json.loads(response.data) == "json"))
 
@@ -230,9 +232,9 @@ class TestBucketList(BaseTestCase):
             {
                 "name": "do this",
                 "bucketlist_id": 1
-            }),
+            }), content_type="application/json",
             headers={"Authorization": "Bearer {}".format(self.token)})
-        self.assertEqual(response.staus_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_update_bucketlist_item_invalid_id(self):
         self.login_user()
@@ -242,9 +244,9 @@ class TestBucketList(BaseTestCase):
             "/bucketlists/1/items/1",
             data=json.dumps({
                 "name": "do this", "date_created": "asd", "bucketlist_id": 1
-                }),
+                }), content_type="application/json",
             headers={"Authorization": "Bearer {}".format(self.token)})
-        self.assertEqual(response.staus_code, 401)
+        self.assertEqual(response.status_code, 401)
         self.assertTrue(type(json.loads(response.data) == "json"))
 
     def test_delete_item_bucketlist(self):
@@ -265,7 +267,7 @@ class TestBucketList(BaseTestCase):
         response = self.client.delete(
             "/bucketlists/1/items/1",
             headers={"Authorization": "Bearer {}".format(self.token)})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 401)
         self.assertTrue(type(json.loads(response.data) == "json"))
 
 
