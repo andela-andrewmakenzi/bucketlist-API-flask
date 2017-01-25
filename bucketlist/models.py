@@ -33,11 +33,14 @@ class Bucketlist(db.Model):
         self.date_modified = date
 
     def returnthis(self):
+        allitems = [item.return_data() for item in self.items]
         return {
+            "id": self.id,
             "name": self.name,
             "date_created": self.date_created,
             "date_modified": self.date_modified,
-            "created_by": self.created_by
+            "created_by": self.created_by,
+            "items": allitems
         }
 
 
@@ -64,6 +67,16 @@ class Items(db.Model):
 
     def set_last_modified_date(self, date):
         self.date_modified = date
+
+    def returnthis(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "date_created": self.date_created,
+            "date_modified": self.date_modified,
+            "created_by": self.created_by,
+            "done": self.done
+        }
 
 
 class User(db.Model):
