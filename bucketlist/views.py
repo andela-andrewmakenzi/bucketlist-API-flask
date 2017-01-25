@@ -94,9 +94,9 @@ def list_created_bucketlist():
     if request.args.get("limit"):
         search_limit = True
     if search_name and search_limit:
-        bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id, name=request.args.get("q")).limit(request.args.get("limit")).all()
+        bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id).filter(Bucketlist.name.like("%{}%".format(request.args.get("q")))).limit(request.args.get("limit")).all()
     elif search_name:
-        bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id, name=request.args.get("q")).all()
+        bl = db.session.query(Bucketlist).filter(Bucketlist.created_by == g.user.id, Bucketlist.name.like('%{}%'.format(request.args.get("q")))).all()
     elif search_limit:
         bl = db.session.query(Bucketlist).filter_by(created_by=g.user.id).limit(request.args.get("limit")).all()
     else:
