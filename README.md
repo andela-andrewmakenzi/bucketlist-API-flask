@@ -13,7 +13,7 @@ Flask API
 | `/bucketlists/` | `POST` | Create a new Bucketlist |
 | `/bucketlists/` | `GET` | Retrieve all bucketlists for user |
 | `/bucketlists/?limit=2` | `GET` | Retrieve one bucketlist per page |
-| `/bucketlists/?q=bl` | `GET` | Search bucketlist by name |
+| `/bucketlists/?q=bl` | `GET` | Match bucketlist by name |
 | `/bucketlists/<id>/` | `GET` |  Retrieve bucket list details |
 | `/bucketlists/<id>/` | `PUT` | Update bucket list details |
 | `/bucketlists/<id>/` | `DELETE` | Delete a bucket list |
