@@ -33,7 +33,7 @@ class Bucketlist(db.Model):
         self.date_modified = date
 
     def returnthis(self):
-        allitems = [item.return_data() for item in self.items]
+        allitems = [item.returnthis() for item in self.items]
         return {
             "id": self.id,
             "name": self.name,
