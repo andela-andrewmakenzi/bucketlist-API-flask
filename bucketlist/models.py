@@ -74,7 +74,6 @@ class Items(db.Model):
             "name": self.name,
             "date_created": self.date_created,
             "date_modified": self.date_modified,
-            "created_by": self.created_by,
             "done": self.done
         }
 
