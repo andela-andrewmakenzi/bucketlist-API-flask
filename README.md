@@ -8,7 +8,7 @@ Flask API
 
 | URL Endpoint | HTTP Methods | Summary |
 | -------- | ------------- | --------- |
-| `/api/v1/auth/register/` | `POST`  | Register a new user|
+| `/auth/register/` | `POST`  | Register a new user|
 |  `/auth/login/` | `POST` | Login and retrieve token|
 | `/bucketlists/` | `POST` | Create a new Bucketlist |
 | `/bucketlists/` | `GET` | Retrieve all bucketlists for user |
