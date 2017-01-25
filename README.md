@@ -9,16 +9,17 @@ Flask API
 | URL Endpoint | HTTP Methods | Summary |
 | -------- | ------------- | --------- |
 | `/api/v1/auth/register/` | `POST`  | Register a new user|
-|  `/api/v1/auth/login/` | `POST` | Login and retrieve token|
-| `/api/v1/bucketlists/` | `POST` | Create a new Bucketlist |
-| `/api/v1/bucketlists/` | `GET` | Retrieve all bucketlists for user |
-| `/api/v1/bucketlists/?limit=2&page=1` | `GET` | Retrieve one bucketlist per page |
-| `/api/v1/bucketlists/<id>/` | `GET` |  Retrieve bucket list details |
-| `/api/v1/bucketlists/<id>/` | `PUT` | Update bucket list details |
-| `/api/v1/bucketlists/<id>/` | `DELETE` | Delete a bucket list |
-| `/api/v1/bucketlists/<id>/items/` | `POST` |  Create items in a bucket list |
-| `/api/v1/bucketlists/<id>/items/<item_id>/` | `DELETE`| Delete a item in a bucket list|
-| `/api/v1/bucketlists/<id>/items/<item_id>/` | `PUT`| update a bucket list item details|
+|  `/auth/login/` | `POST` | Login and retrieve token|
+| `/bucketlists/` | `POST` | Create a new Bucketlist |
+| `/bucketlists/` | `GET` | Retrieve all bucketlists for user |
+| `/bucketlists/?limit=2` | `GET` | Retrieve one bucketlist per page |
+| `/bucketlists/?q=bl` | `GET` | Search bucketlist by name |
+| `/bucketlists/<id>/` | `GET` |  Retrieve bucket list details |
+| `/bucketlists/<id>/` | `PUT` | Update bucket list details |
+| `/bucketlists/<id>/` | `DELETE` | Delete a bucket list |
+| `/bucketlists/<id>/items/` | `POST` |  Create items in a bucket list |
+| `/bucketlists/<id>/items/<item_id>/` | `DELETE`| Delete a item in a bucket list|
+| `/bucketlists/<id>/items/<item_id>/` | `PUT`| update a bucket list item details|
 
 ## Installation
 
