@@ -63,7 +63,7 @@ def register():
         return jsonify({"message": "Requires username and password to be provided"}), 401
     user = db.session.query(User).filter_by(username=username).first()
     if user:
-        return jsonify({"message": "Cannot created user, already exists"}), 401
+        return jsonify({"message": "Cannot created user, already exists"}), 400
     new_user = User(username, password)
     db.session.add(new_user)
     db.session.commit()
@@ -81,11 +81,11 @@ def create_bucketlist():
     if not request.json or request.json.get("name") is None or request.json.get("name") == "":
         return jsonify({
             "message": "You are require to supply the name of the bucketlist"
-            }), 401
+            }), 400
     bucketlist = db.session.query(Bucketlist).filter_by(created_by=g.user.id, name=request.json.get("name")).first()
     if bucketlist:
         return jsonify({
-            "message": "The item you are trying to create already exists"}), 401
+            "message": "The item you are trying to create already exists"}), 400
     bucketlist = Bucketlist(name=request.json.get("name"), date_created=datetime.now(), created_by=g.user.id, date_modified=datetime.now())
     db.session.add(bucketlist)
     db.session.commit()
@@ -114,9 +114,13 @@ def list_created_bucketlist():
     ls = []
     if not bucketlist:
         if not search_name:
-            return jsonify({"message": "Need to supply name of item you are looking for"}), 401
+            return jsonify(
+                {"message": "Need to supply name of item you are looking for"}
+                ), 400
         else:
-            return jsonify({"message": "No item with that name belonging to user"}), 401
+            return jsonify(
+                {"message": "No item with that name belonging to user"}
+                ), 401
     for item in bucketlist:
         ls.append(item.returnthis())
     return jsonify(ls), 200
@@ -129,7 +133,7 @@ def get_bucket(itemid):
     ls = []
     bucketlist = db.session.query(Bucketlist).get(itemid)
     if not bucketlist:
-        return jsonify({"message": "No item with that id"}), 401
+        return jsonify({"message": "No item with that id"}), 400
     if not bucketlist.created_by == g.user.id:
         return jsonify({
             "message": "That item does not belong to you "}), 401
@@ -142,10 +146,10 @@ def get_bucket(itemid):
 def update_bucketlist(id):
     """ Update name or done status of a bucketlist """
     if not request.json or request.json.get("name") is None or request.json.get("name") == "":
-        return jsonify({"message": "you need to supply new edits in json"}), 401
+        return jsonify({"message": "you need to supply new edits in json"}), 400
     bucketlist = db.session.query(Bucketlist).filter_by(id=id).first()
     if not bucketlist:
-        return jsonify({"message": "The item you request does not exist"}), 401
+        return jsonify({"message": "The item you request does not exist"}), 400
     if not bucketlist.created_by == g.user.id:
         return jsonify({"message": "You don't have permission to modify this item"}), 401
     bucketlist.name = request.json.get("name")
@@ -159,10 +163,10 @@ def update_bucketlist(id):
 def delete_bucketlist(id):
     bucketlist = db.session.query(Bucketlist).filter_by(id=id).first()
     if not bucketlist:
-        return jsonify({"message": "The item you request does not exist"}), 401
+        return jsonify({"message": "The item you request does not exist"}), 400
     if not bucketlist.created_by == g.user.id:
         return jsonify(
-            {"message": "You don't have permission to modify this item"}), 401
+            {"message": "You don't have permission to modify this item"}), 400
     db.session.delete(bucketlist)
     db.session.commit()
     return jsonify({"message": "Deleted bucketlist"}), 200
@@ -174,16 +178,18 @@ def create_new_item(id):
     """ This function created a new item in the bucketlist."""
     if not request.json:
         return jsonify(
-            {"message": "you need to supply name of new item as JSON"}), 401
+            {"message": "you need to supply name of new item as JSON"}), 400
     item_name = request.json.get("name")
     if item_name is None or item_name == "":
-        return jsonify({"message": "you need to supply name of new item as JSON"}), 401
+        return jsonify(
+            {"message": "you need to supply name of new item as JSON"}
+            ), 400
     bucketlist = db.session.query(Items).filter_by(name=item_name).first()
     if bucketlist:
-        return jsonify({"message": "User has already created that item"}), 401
+        return jsonify({"message": "User has already created that item"}), 400
     bucketlist = db.session.query(Bucketlist).filter_by(id=id).first()
-    if not bucketlist:  # if the bucketlist they are trying to create in does not exist
-        return jsonify({"message": "Bucketlist does not exist"}), 401
+    if not bucketlist:
+        return jsonify({"message": "Bucketlist does not exist"}), 400
     new_item = Items(
         name=item_name,
         date_created=datetime.now(),
@@ -201,25 +207,30 @@ def update_bucket_list_item(id, item_id):
     """ Update name and done status of a bucketlist list item"""
     if not request.json:
         return jsonify(
-            {"message": "you need to supply new name as JSON"}), 401
+            {"message": "you need to supply new name as JSON"}), 400
     item_name = request.json.get("name")
     done = request.json.get("done")
     if item_name is None or item_name == "":
-        return jsonify({"message": "you need to supply new name as JSON"}), 401
+        return jsonify({"message": "you need to supply new name as JSON"}), 400
     bucketlist = db.session.query(Bucketlist).filter_by(id=id).first()
     if not bucketlist:
         return jsonify({
-            "message": "The bucketlist does not exist, it was probably deleted"}), 401
+            "message": "The bucketlist does not exist, it was probably deleted"
+            }), 400
     buckettlistitem = db.session.query(Items).filter_by(id=item_id).first()
     if not buckettlistitem:
-        return jsonify({"message": "Item does not exist, no item with that id"}), 401
+        return jsonify(
+            {"message": "Item does not exist, no item with that id"}
+            ), 400
     if buckettlistitem.name == item_name:
-        return jsonify({"message": "No change to be recorded, set a new value for whatever you want to update"}), 401
+        return jsonify(
+            {"message": "No change to be recorded, set a new value for whatever you want to update"}
+            ), 400
     if done:
         if done.lower() == "true":
-            bli.done = True
+            buckettlistitem.done = True
         else:
-            bli.done = False
+            buckettlistitem.done = False
     buckettlistitem.name = item_name
     buckettlistitem.date_modified = datetime.now()
     db.session.commit()
@@ -233,13 +244,13 @@ def delete_bucket_list_item(id, item_id):
     if not bucketlist:
         return jsonify(
             {"message": "Bucketlist does not exist, cannot delete"}
-            ), 401
+            ), 400
     if not bucketlist.created_by == g.user.id:
         return jsonify({
             "message": "You dont own the bucketlist, cannot delete"}), 401
     bucketlistitem = db.session.query(Items).filter_by(id=item_id).first()
     if not bucketlistitem:
-        return jsonify({"message": "User does not have that item, cannot delete"}), 401
+        return jsonify({"message": "User does not have that item, cannot delete"}), 400
     db.session.delete(bucketlistitem)
     db.session.commit()
     return jsonify({"message": "Successfully deleted item"}), 200
