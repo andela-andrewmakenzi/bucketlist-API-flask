@@ -6,8 +6,10 @@ from bucketlist.models import db, User
 class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
+        """ Default configuration. """
         app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///../testbucketlist.db"
         app.config["TESTING"] = True
+        """ Update to use fixtures instead """
         db.drop_all()
         db.create_all()  # create all tables based
         new_user = User(username="admin", password="admin")

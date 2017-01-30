@@ -1,13 +1,15 @@
-from .test_base import BaseTestCase
-from bucketlist.models import db, User, Bucketlist, Items
-from flask import json
 from datetime import datetime
 import unittest
+from flask import json
+from .test_base import BaseTestCase
+from bucketlist.models import db, User, Bucketlist, Items
 
 
 class TestBucketList(BaseTestCase):
 
     def login_user(self):
+        """ We use this to login the user.
+        we generate a token we use user whenever we send a request."""
         self.user = db.session.query(User).filter_by(username="admin").first()
         # simulate login
         self.token = self.user.generate_auth_token().decode("utf-8")

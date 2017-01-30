@@ -1,7 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
-from . import app
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
 from passlib.hash import sha256_crypt
+from . import app
+
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///./bucketlist.db"
 db = SQLAlchemy(app)
@@ -14,6 +15,7 @@ class Bucketlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True, nullable=False)
     date_created = db.Column(db.DateTime, nullable=False)
+    """ You can set this so it changes whenever the row is updated """
     date_modified = db.Column(db.DateTime, nullable=True)
     created_by = db.Column(db.Integer, nullable=False)
     """ creates an association in Items so we can get the
@@ -51,6 +53,7 @@ class Items(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(50), nullable=False)
     date_created = db.Column(db.DateTime, nullable=False)
+    """ You can set this so that it changes whenever the row is updated """
     date_modified = db.Column(db.DateTime, nullable=True)
     done = db.Column(db.Boolean, nullable=False, unique=False, default=False)
     bucketlistid = db.Column(db.Integer, db.ForeignKey("Bucketlist.id"), nullable=False, unique=False)
