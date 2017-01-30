@@ -63,7 +63,7 @@ def register():
         return jsonify({"message": "Requires username and password to be provided"}), 401
     user = db.session.query(User).filter_by(username=username).first()
     if user:
-        return jsonify({"message": "Cannot created user, already exists"}), 400
+        return jsonify({"message": "Cannot created user, already exists"}), 401
     new_user = User(username, password)
     db.session.add(new_user)
     db.session.commit()
