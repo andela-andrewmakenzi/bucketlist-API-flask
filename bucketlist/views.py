@@ -63,7 +63,7 @@ def register():
         return jsonify({"message": "Requires username and password to be provided"}), 401
     user = db.session.query(User).filter_by(username=username).first()
     if user:
-        return jsonify({"message": "Cannot created user, already exists"}), 401
+        return jsonify({"message": "Cannot create user, already exists"}), 403
     new_user = User(username, password)
     db.session.add(new_user)
     db.session.commit()
@@ -136,7 +136,7 @@ def get_bucket(itemid):
         return jsonify({"message": "No item with that id"}), 400
     if not bucketlist.created_by == g.user.id:
         return jsonify({
-            "message": "That item does not belong to you "}), 401
+            "message": "That item does not belong to you "}), 403
     ls.append(bucketlist.returnthis())
     return jsonify(ls), 200
 
@@ -151,7 +151,7 @@ def update_bucketlist(id):
     if not bucketlist:
         return jsonify({"message": "The item you request does not exist"}), 400
     if not bucketlist.created_by == g.user.id:
-        return jsonify({"message": "You don't have permission to modify this item"}), 401
+        return jsonify({"message": "You don't have permission to modify this item"}), 403
     bucketlist.name = request.json.get("name")
     bucketlist.date_modified = datetime.now()
     db.session.commit()
