@@ -67,7 +67,7 @@ class TestLogin(BaseTestCase):
     def test_register_with_existing_username(self):
         credentials = {"username": "admin", "password": "admin"}  # this should be the second user we are registering
         response = self.client.post("/auth/register", data=json.dumps(credentials), content_type="application/json")
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
         self.assertTrue(json.loads(response.data))  # test return JSON err msg
 
     def test_register_user_required_field_not_passed(self):

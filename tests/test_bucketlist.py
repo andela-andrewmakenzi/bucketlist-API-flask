@@ -122,7 +122,7 @@ class TestBucketList(BaseTestCase):
         # try to gain access with thier token to admins bucketlist
         response = self.client.get("/bucketlists/1", headers={
             "Authorization": "Bearer {}".format(self.token)})
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
         self.assertTrue(type(json.loads(response.data) == "json"))
 
     def test_update_bucketlist(self):
